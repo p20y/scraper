@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "amazon_search": {
+            "command": "/Users/pradeeps2/Documents/projects/amazonscraper/.venv/bin/python3",
+            "args": [
+                "/Users/pradeeps2/Documents/projects/amazonscraper/server.py"
+            ],
+            "transport": "stdio"
+        }
+    }
+} 

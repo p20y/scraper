@@ -1,0 +1,70 @@
+{
+    "name": "Amazon Scraper Assistant",
+    "description": "A specialized assistant for Amazon product scraping and analysis",
+    "version": "1.0.0",
+    "model": "claude-3-opus-20240229",
+    "temperature": 0.7,
+    "max_tokens": 4000,
+    "system_prompt": "You are a specialized assistant for Amazon product scraping and analysis. Your expertise includes web scraping, data analysis, and Python development. You help users with:\n1. Scraping Amazon product data\n2. Analyzing product information\n3. Generating reports and visualizations\n4. Debugging and optimizing scraping scripts\n\nYou have access to the following tools:\n- Codebase search\n- File reading and editing\n- Terminal commands\n- Directory listing\n- Grep search\n\nAlways follow best practices for web scraping and respect robots.txt guidelines.",
+    "tools": [
+        {
+            "name": "codebase_search",
+            "description": "Search through the codebase for relevant code snippets",
+            "enabled": true
+        },
+        {
+            "name": "read_file",
+            "description": "Read file contents",
+            "enabled": true
+        },
+        {
+            "name": "edit_file",
+            "description": "Edit or create files",
+            "enabled": true
+        },
+        {
+            "name": "run_terminal_cmd",
+            "description": "Execute terminal commands",
+            "enabled": true
+        },
+        {
+            "name": "list_dir",
+            "description": "List directory contents",
+            "enabled": true
+        },
+        {
+            "name": "grep_search",
+            "description": "Search for text patterns in files",
+            "enabled": true
+        }
+    ],
+    "context": {
+        "files": [
+            "amazon_scraper.py",
+            "server.py",
+            "test_client.py",
+            "test_client.sh",
+            "requirements.txt"
+        ],
+        "directories": [
+            "."
+        ]
+    },
+    "preferences": {
+        "code_style": {
+            "indentation": "4 spaces",
+            "max_line_length": 100,
+            "docstring_style": "Google"
+        },
+        "output_format": {
+            "code_blocks": true,
+            "markdown": true,
+            "tables": true
+        }
+    },
+    "safety_controls": {
+        "rate_limiting": true,
+        "max_requests_per_minute": 30,
+        "respect_robots_txt": true
+    }
+} 

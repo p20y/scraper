@@ -1,0 +1,26 @@
+{
+  "name": "Amazon Scraper",
+  "description": "A server that scrapes Amazon search results and returns product information",
+  "version": "1.0.0",
+  "tools": [
+    {
+      "name": "search_amazon",
+      "description": "Search Amazon for products and return results in markdown format",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "search_term": {
+            "type": "string",
+            "description": "The search term to look up on Amazon"
+          }
+        },
+        "required": ["search_term"]
+      }
+    }
+  ],
+  "server": {
+    "command": "python",
+    "args": ["server.py"],
+    "transport": "stdio"
+  }
+} 
