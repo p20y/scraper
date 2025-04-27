@@ -1,38 +1,66 @@
-# Amazon Product Scraper
+# Amazon Scraper
 
-This script scrapes Amazon search results for a given search term and converts them to markdown format.
+A Python-based web scraper for Amazon that allows searching for products and adding sponsored products to cart.
+
+## Features
+
+- Search Amazon products
+- Add sponsored products to cart
+- Human-like behavior to avoid detection
+- Session management
+- Error handling and logging
 
 ## Requirements
 
-- Python 3.6 or higher
-- Required packages listed in `requirements.txt`
+- Python 3.7+
+- Selenium
+- Chrome WebDriver
+- Other dependencies listed in `requirements.txt`
 
 ## Installation
 
-1. Clone this repository
-2. Install the required packages:
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/amazonscraper.git
+cd amazonscraper
+```
+
+2. Create a virtual environment and activate it:
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
 ## Usage
 
-Run the script:
+1. Start the server:
 ```bash
-python amazon_scraper.py
+python server.py
 ```
 
-The script will:
-1. Search Amazon for "Lavender oils"
-2. Extract product information including:
-   - Product title
-   - Price
-   - Rating
-   - Product URL
-3. Save the results to `amazon_search_results.md`
+2. Run the test client:
+```bash
+python simple_test_client.py
+```
 
-## Notes
+3. Follow the menu prompts to:
+   - Search for products
+   - Add sponsored products to cart
+   - Exit the program
 
-- The script includes random delays to avoid being blocked by Amazon
-- Results are saved in markdown format for easy reading
-- The script uses a browser-like user agent to mimic real browser requests 
+## Project Structure
+
+- `amazon_scraper.py`: Core scraping functionality
+- `server.py`: MCP server implementation
+- `simple_test_client.py`: Simple test client for testing functionality
+- `test_client.py`: Advanced test client with more features
+- `requirements.txt`: Project dependencies
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details. 
