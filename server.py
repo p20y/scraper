@@ -6,7 +6,8 @@ from amazon_scraper import (
     add_sponsored_products_to_cart,
     cleanup_driver,
     setup_driver,
-    handle_captcha
+    handle_captcha,
+    add_top_sponsored_products_to_cart
 )
 import traceback
 import atexit
@@ -54,118 +55,54 @@ async def search_amazon(search_term: str) -> str:
         return f"Error: Search failed - {str(e)}"
 
 @mcp.tool()
-async def add_sponsored_products_to_cart(search_term, number_of_products=4):
-    driver = None
+async def add_sponsored_products_to_cart(search_term: str, number_of_products: int = 4) -> dict:
+    """
+    Add sponsored products to cart by calling add_top_sponsored_products_to_cart from amazon_scraper.py.
+    
+    Args:
+        search_term: The search term to find sponsored products
+        number_of_products: Number of products to add to cart (default: 4)
+        
+    Returns:
+        A dictionary containing the status and list of added products
+    """
     try:
-        # Setup driver using the existing setup_driver method
-        driver = setup_driver()
-        if not driver:
-            raise Exception("Failed to setup browser")
+        # Validate input parameters
+        if not isinstance(search_term, str) or not search_term.strip():
+            raise ValueError("search_term must be a non-empty string")
             
-        logger.info(f"Starting search for sponsored products: {search_term}")
+        if not isinstance(number_of_products, int) or number_of_products <= 0:
+            raise ValueError("number_of_products must be a positive integer")
+            
+        logger.info(f"Processing add to cart request for {number_of_products} products")
         
-        # Construct Amazon search URL from search term
-        search_term_encoded = search_term.replace(' ', '+')
-        amazon_url = f"https://www.amazon.com/s?k={search_term_encoded}"
-        driver.get(amazon_url)
+        # Call add_top_sponsored_products_to_cart from amazon_scraper.py
+        added_products = await add_top_sponsored_products_to_cart(search_term, number_of_products)
         
-        # Wait for page to load
-        wait = WebDriverWait(driver, 15)
-        logger.info("Waiting for page to load...")
-        wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.s-main-slot")))
-        logger.info("Page loaded successfully")
-        
-        # Check for captcha
-        if not handle_captcha(driver):
-            raise Exception("Failed to handle CAPTCHA")
-        
-        # Print the page title for debugging
-        logger.info(f"Page title: {driver.title}")
-        
-        # Find all sponsored products using the exact HTML structure
-        sponsored_selectors = [
-            'div[class*="a-section"][class*="a-spacing-small"][class*="puis-padding-left-small"][class*="puis-padding-right-small"]',  # Main sponsored container
-            'div[class*="puis-card-container"]'  # Card container
-        ]
-        
-        sponsored_products = []  # Store both product info and add to cart button
-        for selector in sponsored_selectors:
-            try:
-                elements = driver.find_elements(By.CSS_SELECTOR, selector)
-                logger.info(f"Found {len(elements)} elements with selector: {selector}")
-                
-                for element in elements:
-                    try:
-                        # Look for the "Sponsored" label with the exact class structure
-                        sponsored_label = element.find_elements(By.CSS_SELECTOR, 'a[class="puis-label-popover puis-sponsored-label-text"] span[class="puis-label-popover-default"] span[class="a-color-secondary"]')
-                        if sponsored_label:
-                            # Verify the label actually says "Sponsored"
-                            label_text = sponsored_label[0].text.strip()
-                            if label_text.lower() != "sponsored":
-                                continue
-                                
-                            # Get product link
-                            product_link = element.find_element(By.CSS_SELECTOR, 'a[class="a-link-normal s-line-clamp-3 s-link-style a-text-normal"]').get_attribute("href")
-                            # Get product title
-                            product_title = element.find_element(By.CSS_SELECTOR, 'h2[class*="a-size-base-plus"] span').text
-                            # Get Add to Cart button
-                            add_to_cart = element.find_element(By.CSS_SELECTOR, 'button[name="submit.addToCart"]')
-                            
-                            if product_link and add_to_cart:
-                                product_info = {
-                                    'link': product_link,
-                                    'title': product_title,
-                                    'add_to_cart_button': add_to_cart
-                                }
-                                sponsored_products.append(product_info)
-                                logger.info(f"Found sponsored product: {product_title}")
-                                logger.info(f"Product link: [{product_title}]({product_link})")
-                    except Exception as e:
-                        logger.warning(f"Error processing element: {e}")
-                        continue
-            except Exception as e:
-                logger.warning(f"Error with selector {selector}: {e}")
-                continue
-
-        logger.info(f"\nFound {len(sponsored_products)} sponsored products with Add to Cart buttons.")
-
-        # Limit to top X
-        sponsored_products = sponsored_products[:number_of_products]
-
-        # Print all found products in markdown format
-        logger.info("\nSponsored Products Found:")
-        for idx, product in enumerate(sponsored_products, 1):
-            logger.info(f"{idx}. [{product['title']}]({product['link']})")
-
-        # Click Add to Cart for each product
-        for index, product in enumerate(sponsored_products):
-            try:
-                logger.info(f"\nAdding product {index + 1} to cart: {product['title']}")
-                logger.info(f"Product link: [{product['title']}]({product['link']})")
-                driver.execute_script("arguments[0].click();", product['add_to_cart_button'])
-                logger.info(f"Added product {index + 1} to cart")
-
-                # Optional sleep to let Amazon process cart addition
-                time.sleep(2)
-
-            except Exception as e:
-                logger.error(f"Error adding product {index + 1}: {e}")
-
-        return {
-            'status': 'success',
-            'message': f'Successfully added {len(sponsored_products)} products to cart',
-            'products': [{'title': p['title'], 'link': p['link']} for p in sponsored_products]
+        # Format response
+        response = {
+            'status': 'success' if added_products else 'warning',
+            'message': f'Successfully added {len(added_products)} products to cart' if added_products else 'No products were added to cart',
+            'products': added_products if added_products else []
         }
-
-    except Exception as e:
-        logger.error(f"Error in add_to_cart: {e}")
+        
+        logger.info(f"Response: {response}")
+        return response
+            
+    except ValueError as ve:
+        logger.error(f"Validation error: {str(ve)}")
         return {
             'status': 'error',
-            'message': str(e)
+            'message': str(ve),
+            'products': []
         }
-    finally:
-        if driver:
-            cleanup_driver()
+    except Exception as e:
+        logger.error(f"Error adding products to cart: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e),
+            'products': []
+        }
 
 def run_server():
     """Run the MCP server"""
